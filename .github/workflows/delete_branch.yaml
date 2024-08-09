@@ -26,40 +26,40 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Delete Git tags
-        run: |
-          git config user.email "amirraza2221@gmail.com"
-          git config user.name "Delete Pipeline"
+      # - name: Delete Git tags
+      #   run: |
+      #     git config user.email "amirraza2221@gmail.com"
+      #     git config user.name "Delete Pipeline"
           
-          # set -e
-          TAG_PATTERN="[0-9]+.[0-9]+.[0-9]+$"
+      #     # set -e
+      #     TAG_PATTERN="[0-9]+.[0-9]+.[0-9]+$"
 
-          # Get a list of all tags matching the pattern
-          tags=$(git tag --list --sort=-version:refname | grep -E "$TAG_PATTERN")
+      #     # Get a list of all tags matching the pattern
+      #     tags=$(git tag --list --sort=-version:refname | grep -E "$TAG_PATTERN")
 
-          if [[ -z "$tags" ]]; then
-            echo "No tags matching the pattern $TAG_PATTERN found."
-            exit 0
-          fi
+      #     if [[ -z "$tags" ]]; then
+      #       echo "No tags matching the pattern $TAG_PATTERN found."
+      #       exit 0
+      #     fi
 
-          echo "Tags matching the pattern $TAG_PATTERN:"
-          echo "$tags"
-          echo "Tags to be deleted: ${{ github.event.inputs.versionsToDelete }}"
+      #     echo "Tags matching the pattern $TAG_PATTERN:"
+      #     echo "$tags"
+      #     echo "Tags to be deleted: ${{ github.event.inputs.versionsToDelete }}"
 
-          # Split the versionsToDelete parameter by comma
-          IFS=',' read -ra delete_tags_array <<< "${{ github.event.inputs.versionsToDelete }}"
+      #     # Split the versionsToDelete parameter by comma
+      #     IFS=',' read -ra delete_tags_array <<< "${{ github.event.inputs.versionsToDelete }}"
 
-          for delete_tag in "${delete_tags_array[@]}"; do
-            if [[ "$delete_tag" =~ $TAG_PATTERN ]]; then
-              git tag -d "$delete_tag"
-              git push --delete origin "$delete_tag"
-              echo "Tag '$delete_tag' deleted successfully."
-            else
-              echo "Skipping deletion of tag '$delete_tag' as it doesn't match the pattern $TAG_PATTERN."
-            fi
-          done
+      #     for delete_tag in "${delete_tags_array[@]}"; do
+      #       if [[ "$delete_tag" =~ $TAG_PATTERN ]]; then
+      #         git tag -d "$delete_tag"
+      #         git push --delete origin "$delete_tag"
+      #         echo "Tag '$delete_tag' deleted successfully."
+      #       else
+      #         echo "Skipping deletion of tag '$delete_tag' as it doesn't match the pattern $TAG_PATTERN."
+      #       fi
+      #     done
 
-          echo "Tags deleted successfully."
+      #     echo "Tags deleted successfully."
 
   delete-branches:
     name: "Delete Git branches"
