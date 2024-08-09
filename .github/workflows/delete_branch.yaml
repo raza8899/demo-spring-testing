@@ -23,7 +23,7 @@ jobs:
 
       - name: Delete Git tags
         run: |
-          git config user.email "amir.raza@diconium.com"
+          git config user.email "amirraza2221@gmail.com"
           git config user.name "Delete Pipeline"
           
           set -e
@@ -67,7 +67,7 @@ jobs:
 
       - name: Delete Remote Branches
         run: |
-          git config user.email "amir.raza@diconium.com"
+          git config user.email "amirraza2221@gmail.com"
           git config user.name "Delete Pipeline"
           
           IFS=',' read -ra branchesToDeleteArray <<< "${{ github.event.inputs.branchesToDelete }}"
