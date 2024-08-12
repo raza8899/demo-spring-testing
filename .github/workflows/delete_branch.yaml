@@ -23,41 +23,53 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Delete Git tags
+        run: |
+          git config user.email "amirraza2221@gmail.com"
+          git config user.name "Delete Pipeline"
+      
+          TAG_PATTERN="[0-9]+.[0-9]+.[0-9]+$"
+      
+          # Get a list of all tags matching the pattern
+          tags=$(git tag --list --sort=-version:refname | grep -E "$TAG_PATTERN")
+      
+          if [[ -z "$tags" ]]; then
+            echo "No tags matching the pattern $TAG_PATTERN found."
+            exit 0
+          fi
+      
+          echo "Tags matching the pattern $TAG_PATTERN:"
+          echo "$tags"
+          echo "Tags to be deleted: ${{ github.event.inputs.versionsToDelete }}"
+      
+          # Split the versionsToDelete parameter by comma
+          IFS=',' read -r -a delete_tags_array <<< "${{ github.event.inputs.versionsToDelete }}"
+      
+          for delete_tag in "${delete_tags_array[@]}"; do
+            echo "Processing tag: $delete_tag"
+            
+            if [[ "$delete_tag" =~ $TAG_PATTERN ]]; then
+              git tag -d "$delete_tag"
+              
+              # Check if the tag deletion was successful locally
+              if [ $? -eq 0 ]; then
+                git push --delete origin "$delete_tag"
+                
+                if [ $? -eq 0 ]; then
+                  echo "Tag '$delete_tag' deleted successfully."
+                else:
+                  echo "Failed to delete tag '$delete_tag' on the remote."
+                fi
+              else
+                echo "Failed to delete local tag '$delete_tag'."
+              fi
+            else
+              echo "Skipping deletion of tag '$delete_tag' as it doesn't match the pattern $TAG_PATTERN."
+            fi
+          done
+      
+          echo "Tags deletion process completed."
 
-      # - name: Delete Git tags
-      #   run: |
-      #     git config user.email "amirraza2221@gmail.com"
-      #     git config user.name "Delete Pipeline"
-          
-      #     # set -e
-      #     TAG_PATTERN="[0-9]+.[0-9]+.[0-9]+$"
-
-      #     # Get a list of all tags matching the pattern
-      #     tags=$(git tag --list --sort=-version:refname | grep -E "$TAG_PATTERN")
-
-      #     if [[ -z "$tags" ]]; then
-      #       echo "No tags matching the pattern $TAG_PATTERN found."
-      #       exit 0
-      #     fi
-
-      #     echo "Tags matching the pattern $TAG_PATTERN:"
-      #     echo "$tags"
-      #     echo "Tags to be deleted: ${{ github.event.inputs.versionsToDelete }}"
-
-      #     # Split the versionsToDelete parameter by comma
-      #     IFS=',' read -ra delete_tags_array <<< "${{ github.event.inputs.versionsToDelete }}"
-
-      #     for delete_tag in "${delete_tags_array[@]}"; do
-      #       if [[ "$delete_tag" =~ $TAG_PATTERN ]]; then
-      #         git tag -d "$delete_tag"
-      #         git push --delete origin "$delete_tag"
-      #         echo "Tag '$delete_tag' deleted successfully."
-      #       else
-      #         echo "Skipping deletion of tag '$delete_tag' as it doesn't match the pattern $TAG_PATTERN."
-      #       fi
-      #     done
-
-      #     echo "Tags deleted successfully."
 
   delete-branches:
     name: "Delete Git branches"
@@ -94,13 +106,3 @@ jobs:
               echo "Failed to delete branch '$branch'. It may not exist."
             fi
           done
-          
-          # for branch in "${branchesToDeleteArray[@]}"; do
-          #   echo "Working fourth line"
-          #   if [[ "$branch" =~ "master" ]]; then
-          #     echo "Cannot delete master branch"
-          #     continue
-          #   fi
-          
-          #   git push origin --delete "$branch"
-          #   echo "Remote branch '$branch' deleted successfully."
