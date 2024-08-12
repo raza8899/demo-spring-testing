@@ -75,13 +75,32 @@ jobs:
           git config user.name "Delete Pipeline"
           echo "Working second line"
           IFS=',' read -ra branchesToDeleteArray <<< "${{ github.event.inputs.branchesToDelete }}"
-          echo "Working third line"
+          echo "Working third line '$branchesToDeleteArray' array "
           for branch in "${branchesToDeleteArray[@]}"; do
-            echo "Working fourth line"
-            if [[ "$branch" =~ "master" ]]; then
+            echo "Processing branch: $branch"
+            
+            # Check if the branch name is 'master'
+            if [ "$branch" = "master" ]; then
               echo "Cannot delete master branch"
               continue
             fi
-          
+            
+            # Attempt to delete the branch
             git push origin --delete "$branch"
-            echo "Remote branch '$branch' deleted successfully."
+            
+            if [ $? -eq 0 ]; then
+              echo "Remote branch '$branch' deleted successfully."
+            else
+              echo "Failed to delete branch '$branch'. It may not exist."
+            fi
+          done
+          
+          # for branch in "${branchesToDeleteArray[@]}"; do
+          #   echo "Working fourth line"
+          #   if [[ "$branch" =~ "master" ]]; then
+          #     echo "Cannot delete master branch"
+          #     continue
+          #   fi
+          
+          #   git push origin --delete "$branch"
+          #   echo "Remote branch '$branch' deleted successfully."
