@@ -70,13 +70,14 @@ jobs:
 
       - name: Delete Remote Branches
         run: |
+          echo "Working first line"
           git config user.email "amirraza2221@gmail.com"
           git config user.name "Delete Pipeline"
-          
+          echo "Working second line"
           IFS=',' read -ra branchesToDeleteArray <<< "${{ github.event.inputs.branchesToDelete }}"
-
+          echo "Working third line"
           for branch in "${branchesToDeleteArray[@]}"; do
-          
+            echo "Working fourth line"
             if [[ "$branch" =~ "master" ]]; then
               echo "Cannot delete master branch"
               continue
