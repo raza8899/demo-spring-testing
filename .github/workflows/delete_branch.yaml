@@ -28,10 +28,11 @@ jobs:
           git config user.email "amirraza2221@gmail.com"
           git config user.name "Delete Pipeline"
           echo "working first"
-          TAG_PATTERN="[0-9]+.[0-9]+.[0-9]+$"
-          
+          TAG_PATTERN="^[0-9]+\.[0-9]+\.[0-9]+$"
+
           # Get a list of all tags matching the pattern
-          tags=$(git tag --list --sort=-version:refname | grep -E "$TAG_PATTERN")
+          tags=$(git tag --list | grep -E "$TAG_PATTERN")
+
           echo "working second"
           if [[ -z "$tags" ]]; then
             echo "No tags matching the pattern $TAG_PATTERN found."
