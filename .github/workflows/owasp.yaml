@@ -1,0 +1,41 @@
+name: "OWASP Dependency Check"
+
+# This workflow will not trigger automatically
+on:
+  schedule:
+    - cron: "42 2 * * *"  # Schedule for daily execution at 02:42 UTC
+  workflow_dispatch:  # Allows manual triggering of the workflow
+
+jobs:
+  owasp_scan:
+    runs-on: ubuntu-latest
+
+    env:
+      MAVEN_CACHE_FOLDER: ${{ github.workspace }}/.m2/repository
+      MAVEN_OPTS: '-Dmaven.repo.local=${{ github.workspace }}/.m2/repository'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.MAVEN_CACHE_FOLDER }}
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+            ${{ runner.os }}-
+
+      - name: Run OWASP Dependency Check
+        run: |
+          mvn -Powasp -DskipTests verify \
+            -Dmaven.repo.local=${{ env.MAVEN_CACHE_FOLDER }} \
+            -Xmx3072m
+
+      - name: Publish OWASP Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-check-report
+          path: target/dependency-check-report.html
