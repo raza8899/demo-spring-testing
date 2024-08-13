@@ -12,7 +12,7 @@ jobs:
 
     env:
       MAVEN_CACHE_FOLDER: ${{ github.workspace }}/.m2/repository
-      MAVEN_OPTS: '-Dmaven.repo.local=${{ github.workspace }}/.m2/repository'
+      MAVEN_OPTS: '-Dmaven.repo.local=${{ github.workspace }}/.m2/repository -Xmx3072m'
 
     steps:
       - name: Checkout Code
@@ -29,9 +29,7 @@ jobs:
 
       - name: Run OWASP Dependency Check
         run: |
-          mvn -Powasp -DskipTests verify \
-            -Dmaven.repo.local=${{ env.MAVEN_CACHE_FOLDER }} \
-            -Xmx3072m
+          mvn -Powasp -DskipTests verify
 
       - name: Publish OWASP Report
         if: always()
