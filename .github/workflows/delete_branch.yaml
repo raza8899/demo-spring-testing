@@ -29,9 +29,9 @@ jobs:
           git config user.name "Delete Pipeline"
           TAG_PATTERN="^[0-9]+\.[0-9]+\.[0-9]+$"
           set -o pipefail
+
           # Get a list of all tags
           all_tags=$(git tag --list)
-          echo "working third half '$all_tags' "
           if [[ -z "$all_tags" ]]; then
             echo "No tags found in the repository."
             exit 0
@@ -89,15 +89,12 @@ jobs:
 
       - name: Delete Remote Branches
         run: |
-          echo "Working first line"
           git config user.email "amirraza2221@gmail.com"
           git config user.name "Delete Pipeline"
-          echo "Working second line"
           IFS=',' read -ra branchesToDeleteArray <<< "${{ github.event.inputs.branchesToDelete }}"
-          echo "Working third line '$branchesToDeleteArray' array "
+
           for branch in "${branchesToDeleteArray[@]}"; do
             echo "Processing branch: $branch"
-            
             # Check if the branch name is 'master'
             if [ "$branch" = "master" ]; then
               echo "Cannot delete master branch"
